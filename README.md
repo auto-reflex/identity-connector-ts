@@ -22,18 +22,20 @@ npm install github:auto-reflex/identity-connector-ts#v0.1.0
 ```
 
 Le dépôt est public et **le paquet est livré en TypeScript** (`main: src/index.ts`), comme les modules Expo : Metro le
-compile. Avec Jest (`jest-expo`), il faut l'ajouter aux paquets transformés :
+compile. Avec Jest (`jest-expo`), il faut l'ajouter aux paquets transformés. Un `transformIgnorePatterns` déclaré dans
+`package.json` **remplace** celui du preset : reprendre ses trois entrées (valeurs de `jest-expo` 57) et ajouter
+`@autoreflex` :
 
 ```json
 "jest": {
   "preset": "jest-expo",
   "transformIgnorePatterns": [
-    "node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|@autoreflex/.*))"
+    "/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|expo|@expo|@expo-google-fonts|react-navigation|@react-navigation|@sentry/react-native|native-base|standard-navigation|@autoreflex))",
+    "/node_modules/react-native-reanimated/plugin/",
+    "/node_modules/@react-native/babel-preset/"
   ]
 }
 ```
-
-(reprendre la valeur par défaut de `jest-expo` et y ajouter `@autoreflex/.*`.)
 
 ## Utilisation (Expo)
 
