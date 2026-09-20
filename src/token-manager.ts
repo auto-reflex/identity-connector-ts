@@ -17,7 +17,7 @@ export type TokenManagerOptions = {
 /** Aucune session : la personne n'est pas connectée (ou vient de perdre sa session). */
 export class NoSessionError extends Error {
   constructor() {
-    super('Aucune session AutoReflex.');
+    super('Aucune session AutoGteck.');
     this.name = 'NoSessionError';
   }
 }

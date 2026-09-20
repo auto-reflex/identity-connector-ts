@@ -1,7 +1,7 @@
 {
-  "name": "@autoreflex/identity-connector",
-  "version": "0.1.0",
-  "description": "Client OAuth2 (Authorization Code + PKCE) d'AutoReflex Identity pour les applications TypeScript : mobile Expo, back-office.",
+  "name": "@autogteck/identity-connector",
+  "version": "0.2.0",
+  "description": "Client OAuth2 (Authorization Code + PKCE) d'AutoGteck Identity pour les applications TypeScript : mobile Expo, back-office.",
   "license": "SEE LICENSE IN LICENSE",
   "private": true,
   "type": "module",

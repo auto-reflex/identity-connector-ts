@@ -1,5 +1,5 @@
 /**
- * Client OAuth2 d'AutoReflex Identity : Authorization Code + PKCE, refresh à rotation, révocation. Aucune dépendance
+ * Client OAuth2 d'AutoGteck Identity : Authorization Code + PKCE, refresh à rotation, révocation. Aucune dépendance
  * de plateforme (React Native, navigateur, Node) : uniquement `fetch`, pour rester vérifiable hors appareil.
  *
  * Identity publie ses endpoints dans les métadonnées OAuth 2.0. Le document est chargé une fois par session du
@@ -134,7 +134,7 @@ export function createIdentityClient(config: IdentityClientConfig) {
         headers: { Accept: 'application/json' },
       });
     } catch {
-      throw new IdentityError("Impossible de joindre AutoReflex. Vérifie ta connexion.", 'network_error');
+      throw new IdentityError("Impossible de joindre AutoGteck. Vérifie ta connexion.", 'network_error');
     }
 
     let payload: AuthorizationServerMetadataPayload;
@@ -143,7 +143,7 @@ export function createIdentityClient(config: IdentityClientConfig) {
       payload = (await response.json()) as AuthorizationServerMetadataPayload;
     } catch {
       throw new IdentityError(
-        'La configuration OAuth d’AutoReflex est illisible.',
+        'La configuration OAuth d’AutoGteck est illisible.',
         response.status >= 500 ? 'server_error' : 'invalid_response',
         response.status,
       );
@@ -151,7 +151,7 @@ export function createIdentityClient(config: IdentityClientConfig) {
 
     if (!response.ok) {
       throw new IdentityError(
-        'La configuration OAuth d’AutoReflex est indisponible.',
+        'La configuration OAuth d’AutoGteck est indisponible.',
         response.status >= 500 || response.status === 429 ? 'server_error' : 'rejected',
         response.status,
       );
@@ -163,7 +163,7 @@ export function createIdentityClient(config: IdentityClientConfig) {
       !payload.token_endpoint ||
       !payload.revocation_endpoint
     ) {
-      throw new IdentityError('La configuration OAuth d’AutoReflex est incomplète ou incohérente.', 'invalid_response');
+      throw new IdentityError('La configuration OAuth d’AutoGteck est incomplète ou incohérente.', 'invalid_response');
     }
 
     return {
@@ -191,7 +191,7 @@ export function createIdentityClient(config: IdentityClientConfig) {
         body: formBody(params),
       });
     } catch {
-      throw new IdentityError("Impossible de joindre AutoReflex. Vérifie ta connexion.", 'network_error');
+      throw new IdentityError("Impossible de joindre AutoGteck. Vérifie ta connexion.", 'network_error');
     }
   }
 
@@ -204,14 +204,14 @@ export function createIdentityClient(config: IdentityClientConfig) {
       payload = (await response.json()) as TokenResponse;
     } catch {
       throw new IdentityError(
-        'La réponse d’AutoReflex est illisible.',
+        'La réponse d’AutoGteck est illisible.',
         response.status >= 500 ? 'server_error' : 'invalid_response',
         response.status,
       );
     }
 
     if (!response.ok) {
-      const message = payload.error_description ?? 'AutoReflex a refusé la demande.';
+      const message = payload.error_description ?? 'AutoGteck a refusé la demande.';
 
       if (payload.error === 'invalid_grant') throw new IdentityError(message, 'invalid_grant', response.status);
       if (response.status >= 500 || response.status === 429) throw new IdentityError(message, 'server_error', response.status);
@@ -220,7 +220,7 @@ export function createIdentityClient(config: IdentityClientConfig) {
     }
 
     if (!payload.access_token || !payload.refresh_token) {
-      throw new IdentityError('La réponse d’AutoReflex est incomplète.', 'invalid_response', response.status);
+      throw new IdentityError('La réponse d’AutoGteck est incomplète.', 'invalid_response', response.status);
     }
 
     return {
@@ -261,15 +261,15 @@ export function createIdentityClient(config: IdentityClientConfig) {
       }
 
       if (query.error) {
-        throw new IdentityError(query.error_description ?? 'AutoReflex a refusé la demande.', 'rejected');
+        throw new IdentityError(query.error_description ?? 'AutoGteck a refusé la demande.', 'rejected');
       }
 
       if (query.state !== expectedState) {
-        throw new IdentityError('La réponse d’AutoReflex ne correspond pas à la demande.', 'invalid_state');
+        throw new IdentityError('La réponse d’AutoGteck ne correspond pas à la demande.', 'invalid_state');
       }
 
       if (!query.code) {
-        throw new IdentityError('La réponse d’AutoReflex ne contient pas de code.', 'invalid_response');
+        throw new IdentityError('La réponse d’AutoGteck ne contient pas de code.', 'invalid_response');
       }
 
       return query.code;

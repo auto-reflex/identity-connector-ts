@@ -35,7 +35,7 @@ export function createIdentitySession({ client, tokenManager, crypto, flags, ope
     },
 
     /**
-     * Ouvre la page d'AutoReflex (connexion, ou création du compte, puis consentement), puis échange le code contre les
+     * Ouvre la page d'AutoGteck (connexion, ou création du compte, puis consentement), puis échange le code contre les
      * tokens. Fermer le navigateur ou refuser l'accès n'est pas une erreur : `cancelled`.
      */
     async signIn(): Promise<SignInResult> {

@@ -1,6 +1,6 @@
-# @autoreflex/identity-connector (TypeScript)
+# @autogteck/identity-connector (TypeScript)
 
-Client OAuth2 d'AutoReflex Identity pour les applications TypeScript : mobile Expo, et à terme le
+Client OAuth2 d'AutoGteck Identity pour les applications TypeScript : mobile Expo, et à terme le
 back-office Next.js. Le pendant PHP est [`identity-connector-php`](https://github.com/auto-reflex/identity-connector-php),
 qui vérifie les tokens côté API.
 
@@ -13,7 +13,7 @@ qui vérifie les tokens côté API.
 - Identity n'expose pas OIDC (pas d'`id_token`, pas de fin de session) : `expo-auth-session` et `oidc-client-ts` ne
   conviennent pas, d'où ce client à la main (RFC 6749, 7636, 8414).
 
-Le guide d'intégration complet (API, mobile, vérification) est dans la documentation interne AutoReflex (`docs/connecteur/`).
+Le guide d'intégration complet (API, mobile, vérification) est dans la documentation interne AutoGteck (`docs/connecteur/`).
 
 ## Installation
 
@@ -24,13 +24,13 @@ npm install github:auto-reflex/identity-connector-ts#v0.1.0
 Le dépôt est public et **le paquet est livré en TypeScript** (`main: src/index.ts`), comme les modules Expo : Metro le
 compile. Avec Jest (`jest-expo`), il faut l'ajouter aux paquets transformés. Un `transformIgnorePatterns` déclaré dans
 `package.json` **remplace** celui du preset : reprendre ses trois entrées (valeurs de `jest-expo` 57) et ajouter
-`@autoreflex` :
+`@autogteck` :
 
 ```json
 "jest": {
   "preset": "jest-expo",
   "transformIgnorePatterns": [
-    "/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|expo|@expo|@expo-google-fonts|react-navigation|@react-navigation|@sentry/react-native|native-base|standard-navigation|@autoreflex))",
+    "/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|expo|@expo|@expo-google-fonts|react-navigation|@react-navigation|@sentry/react-native|native-base|standard-navigation|@autogteck))",
     "/node_modules/react-native-reanimated/plugin/",
     "/node_modules/@react-native/babel-preset/"
   ]
@@ -50,7 +50,7 @@ import {
   createIdentitySession,
   createTokenManager,
   type CryptoProvider,
-} from '@autoreflex/identity-connector';
+} from '@autogteck/identity-connector';
 
 import { identityConfig } from './config';
 import { createSecureTokenStore, readForceLogin, writeForceLogin } from './token-store';
@@ -75,7 +75,7 @@ const session = createIdentitySession({
   openAuthSession: (url, redirectUri) => WebBrowser.openAuthSessionAsync(url, redirectUri),
 });
 
-export const { hasSession, signIn: signInWithAutoReflex, signOut: signOutFromIdentity } = session;
+export const { hasSession, signIn: signInWithAutoGteck, signOut: signOutFromIdentity } = session;
 ```
 
 `identityConfig` : `{ issuer, clientId, redirectUri, scope, uiLocales? }`. `issuer` est **identique** au claim `iss` des
