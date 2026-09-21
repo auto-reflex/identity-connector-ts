@@ -86,16 +86,48 @@ tokens, à `IDENTITY_ISSUER` de l'API et à l'adresse publique d'Identity.
 
 ## Utilisation (navigateur, Node, Next.js)
 
-`webCrypto` est le fournisseur fondé sur Web Crypto (navigateurs, Node 20+). Le back-office d'AutoDonuts sera un client
-**confidentiel** (secret côté serveur) : ce paquet en couvre le noyau (`createIdentityClient`, `createTokenManager`), pas
-encore le secret client ni les cookies de session.
+`webCrypto` est le fournisseur fondé sur Web Crypto (navigateurs, Node 20+).
+
+### Application web côté serveur : client confidentiel (Next.js)
+
+Un site comme la Map est un client **confidentiel** : `clientSecret` (côté serveur seulement, jamais `NEXT_PUBLIC_*`)
+accompagne l'échange du code, le refresh et la révocation, et les tokens vivent dans des **cookies httpOnly**, jamais dans
+le navigateur. `createWebSession` porte tout le parcours ; le paquet ne connaît aucun framework, l'application fournit un
+`CookieJar` (`get`, `set`, `delete`) :
+
+```ts
+import { createIdentityClient, createSharedRefresher, createWebSession, webCrypto } from '@autogteck/identity-connector';
+
+const client = createIdentityClient({ issuer, clientId: 'autoreflex-map-web', clientSecret, redirectUri, scope: 'profile email map:access' });
+const refresher = createSharedRefresher(client); // une fois par processus : voir plus bas
+
+export function webSession(jar: CookieJar) {
+  return createWebSession({ client, jar, crypto: webCrypto, secure: process.env.NODE_ENV === 'production', refresher });
+}
+
+// /login (route handler)        : redirect(await webSession(await cookieJar()).beginSignIn({ returnTo }))
+// /auth/callback (route handler): const { returnTo } = await webSession(jar).finishSignIn(request.url); redirect(returnTo)
+// appel d'API (serveur)         : const token = await webSession(jar).getAccessToken({ rejected })
+// /logout                       : await webSession(jar).signOut()
+```
+
+- **Trois cookies** (`identity_access`, `identity_refresh`, `identity_expires`, préfixe configurable) : un JWT RS256 et un refresh
+  token ne tiennent pas ensemble dans les 4 Ko d'un cookie. Le cookie court `identity_pkce` (10 min) porte PKCE et l'adresse de retour ; `safeReturnTo`
+  n'accepte qu'une adresse interne. `identity_relogin` fait redemander les identifiants après une déconnexion volontaire.
+- **Un refresh à usage unique** : une page déclenche plusieurs requêtes en parallèle avec le même refresh token périmé. `createSharedRefresher`
+  les partage pendant 30 s dans le processus (elles reçoivent les mêmes nouveaux tokens) ; sans lui, la seconde recevrait
+  `invalid_grant` et la personne serait déconnectée à tort. Seul `invalid_grant` efface la session ; une coupure réseau la garde.
+- **Où renouveler** : les composants serveur ne peuvent pas écrire de cookies. Le renouvellement a lieu dans `proxy.ts`, avec un
+  `CookieJar` construit sur la requête et la réponse, avant que la page ne lise le token.
+- Un 401 de l'API : `getAccessToken({ rejected: token })` force un refresh (ou rend le token qu'un autre appel a déjà renouvelé) ; rejouer une fois, puis effacer la session.
 
 ## API
 
 | Export | Rôle |
 | --- | --- |
-| `createIdentityClient(config)` | Métadonnées RFC 8414 (émetteur vérifié), `authorizeUrl`, `parseCallback` (vérifie `state`), `exchangeCode`, `refresh`, `revoke`. Délai d'attente de 15 s par appel. |
+| `createIdentityClient(config)` | Métadonnées RFC 8414 (émetteur vérifié), `clientSecret` optionnel (client confidentiel), `authorizeUrl`, `parseCallback` (vérifie `state`), `exchangeCode`, `refresh`, `revoke`. Délai d'attente de 15 s par appel. |
 | `createTokenManager({ store, client })` | `getAccessToken({ rejected? })` (refresh anticipé de 60 s, un seul vol), `current`, `set`, `clear`, `onSessionLost`. |
+| `createWebSession({ client, jar, crypto, secure })` | Application web serveur (client confidentiel) : `beginSignIn`, `finishSignIn`, `getAccessToken`, `hasSession`, `signOut`, sur des cookies httpOnly. `createCookieTokenStore`, `createSharedRefresher`, `safeReturnTo`. |
 | `createIdentitySession(...)` | `signIn()` → `'signed-in' \| 'cancelled'`, `signOut()` (efface tout de suite, révoque en arrière-plan), `hasSession()`. |
 | `createPkceRequest(crypto)`, `webCrypto`, `CryptoProvider` | PKCE et accès à la plateforme. |
 | `IdentityError` (`code`) | `invalid_grant` (session perdue), `network_error` et `server_error` (session gardée), `access_denied`, `invalid_state`, `invalid_response`, `rejected`. |

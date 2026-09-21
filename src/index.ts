@@ -15,3 +15,5 @@ export { createIdentitySession } from './session';
 export type { AuthSessionResult, IdentitySession, IdentitySessionOptions, SessionFlags, SignInResult } from './session';
 export { createTokenManager, NoSessionError } from './token-manager';
 export type { AccessTokenOptions, TokenManager, TokenManagerOptions, TokenStore } from './token-manager';
+export { createCookieTokenStore, createSharedRefresher, createWebSession, safeReturnTo } from './web';
+export type { CookieJar, CookieOptions, PendingSignIn, WebSession, WebSessionOptions } from './web';

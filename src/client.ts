@@ -43,6 +43,12 @@ export type IdentityClientConfig = {
   clientId: string;
   redirectUri: string;
   scope: string;
+  /**
+   * Secret d'un client confidentiel (application web côté serveur). Jamais dans un navigateur ni une application mobile :
+   * ces clients-là sont publics et n'ont que PKCE. Quand il est fourni, il accompagne l'échange du code, le refresh et
+   * la révocation.
+   */
+  clientSecret?: string;
   uiLocales?: string;
   fetch?: typeof fetch;
   now?: () => number;
@@ -188,7 +194,7 @@ export function createIdentityClient(config: IdentityClientConfig) {
       return await fetchWithTimeout(endpoint, {
         method: 'POST',
         headers: { Accept: 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: formBody(params),
+        body: formBody(config.clientSecret ? { ...params, client_secret: config.clientSecret } : params),
       });
     } catch {
       throw new IdentityError("Impossible de joindre AutoGteck. Vérifie ta connexion.", 'network_error');
